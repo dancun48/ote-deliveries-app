@@ -12,6 +12,7 @@ import WhatsAppFloat from './components/WhatsAppFloat'
 import CorporateServices from './pages/CorporateServices'
 import Blog from './pages/Blog'
 import Careers from './pages/Careers'
+import ScrollToTop from './components/ScrollToTop'
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           </div>
         </div>
         <WhatsAppFloat />
+        <ScrollToTop />
       </div>
     </Router>
   )

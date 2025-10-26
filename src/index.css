@@ -18,3 +18,64 @@ html {
 img {
   aspect-ratio: attr(width) / attr(height);
 }
+
+/* Scroll to Top Button Styles */
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 16px;
+  left: 1.5rem;
+  z-index: 50;
+  width: 4rem;
+  height: 4rem;
+  background-color: #FFD700; /* gold color */
+  color: #000;
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease;
+}
+
+.scroll-to-top-btn:hover {
+  background-color: #e6b800; /* darker gold */
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.scroll-to-top-btn:active {
+  transform: scale(0.95);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 5rem;
+    right: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-to-top-btn {
+    bottom: 4.5rem;
+    right: 0.75rem;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
