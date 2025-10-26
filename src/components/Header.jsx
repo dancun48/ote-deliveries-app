@@ -13,7 +13,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="rounded-full flex items-center justify-center">
-              <img src={logo} alt="OTE Deliveries" className='w-32 h-20 md:w-44 md:h-24 rounded-lg object-contain'/>
+              <img src={logo} alt="OTE Deliveries" className='w-32 h-20 md:w-60 md:h-44 rounded-lg object-contain'/>
             </div>
           </Link>
         
