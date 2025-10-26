@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add to your global CSS */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hardware acceleration for animations */
+.scroll-animation {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Prevent layout shifts */
+img {
+  aspect-ratio: attr(width) / attr(height);
+}
