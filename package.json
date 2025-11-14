@@ -1,30 +1,14 @@
 {
-  "name": "delivery-website",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "delivery-app",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.4",
-    "@mui/material": "^7.3.4",
-    "@tailwindcss/postcss": "^4.1.14",
-    "framer-motion": "^12.23.24",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-intersection-observer": "^9.16.0",
-    "react-router-dom": "^6.8.0"
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:admin\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:admin": "cd admin-frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:admin": "cd admin-frontend && npm run build"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.0.0",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.21",
-    "tailwindcss": "^3.2.7",
-    "vite": "^4.1.0"
+    "concurrently": "^8.2.0"
   }
 }
