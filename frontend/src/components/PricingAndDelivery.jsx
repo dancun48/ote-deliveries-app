@@ -53,16 +53,13 @@ function PricingAndDelivery() {
     <div className="min-h-screen  py-8 sm:py-12 lg:py-14 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
         {/* Unified Header Section */}
-        <div className="text-center mb-12 md:mb-16 max-w-6xl mx-auto">
+        <div className="text-center mb-12 md:mb-4 max-w-6xl mx-auto">
           <h2 className="text-base font-semibold text-gray-400 uppercase tracking-wider mb-2">
             PRICING & DELIVERY
           </h2>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gold mb-4 md:mb-6 p-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gold mb-4 md:mb-2 p-2">
             Complete Delivery Solutions
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-gray-400 max-w-3xl mx-auto px-4">
-            Transparent pricing for all your delivery needs in Kisumu
-          </p>
         </div>
 
         <div className="max-w-screen-2xl mx-auto">

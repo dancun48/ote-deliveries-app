@@ -3,6 +3,7 @@ import express from 'express';
 import { driversController } from '../controllers/driversController.js';
 import auth from '../middleware/auth.js';
 import { body, validationResult } from 'express-validator';
+// import { trackingController } from '../controllers/trackingController.js';
 
 const router = express.Router();
 
@@ -66,5 +67,8 @@ router.get('/:driverId', driversController.getDriverById);
 router.post('/', validateCreateDriver, handleValidationErrors, driversController.createDriver);
 router.patch('/:driverId/status', validateUpdateStatus, handleValidationErrors, driversController.updateDriverStatus);
 router.put('/:driverId', validateUpdateDriver, handleValidationErrors, driversController.updateDriver);
+// router.post('/drivers/:driverId/location', trackingController.updateDriverLocation);
+// router.get('/deliveries/:deliveryId/tracking', trackingController.getDeliveryTracking);
+// router.get('/drivers/:driverId/location', trackingController.getDriverLocation);
 
 export default router;

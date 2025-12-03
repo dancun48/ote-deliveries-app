@@ -1,5 +1,5 @@
 import React from "react";
-import ServiceForm from "../components/ServiceForm";
+import ContactForm from "../components/ContactForm";
 import PhoneCallbackTwoToneIcon from "@mui/icons-material/PhoneCallbackTwoTone";
 import AttachEmailTwoToneIcon from "@mui/icons-material/AttachEmailTwoTone";
 import HomeWorkTwoToneIcon from "@mui/icons-material/HomeWorkTwoTone";
@@ -56,7 +56,7 @@ const Contact = () => {
         </ScrollAnimation>
         
         <ScrollAnimation>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+          <div className="flex sm:flex-col md:flex-row justify-around items-center">
             {/* Contact Information */}
             <div className="order-2 lg:order-1">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-black mb-6 md:mb-8">
@@ -104,7 +104,7 @@ const Contact = () => {
 
             {/* Service Form */}
             <div className="order-1 lg:order-2">
-              <ServiceForm />
+              <ContactForm />
             </div>
           </div>
         </ScrollAnimation>

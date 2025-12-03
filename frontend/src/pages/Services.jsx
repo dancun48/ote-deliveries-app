@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ServiceForm from "../components/ServiceForm";
+import ServiceForm from "../components/ContactForm";
 import DirectionsBikeTwoToneIcon from "@mui/icons-material/DirectionsBikeTwoTone";
 import CorporateFareTwoToneIcon from "@mui/icons-material/CorporateFareTwoTone";
 import AllInboxTwoToneIcon from "@mui/icons-material/AllInboxTwoTone";

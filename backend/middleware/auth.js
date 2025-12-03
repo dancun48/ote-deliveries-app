@@ -27,7 +27,7 @@ const auth = async (req, res, next) => {
     req.userId = decoded.userId;
     req.user = user;
     
-    console.log('✅ Authenticated user:', user.email, 'Admin:', user.is_admin);
+    console.log('✅ Authenticated user:', user.email, 'Admin:', user.isAdmin);
     next();
   } catch (error) {
     console.error('❌ Auth middleware error:', error.message);

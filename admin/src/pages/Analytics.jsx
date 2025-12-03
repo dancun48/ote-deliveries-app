@@ -195,12 +195,11 @@ const Analytics = () => {
           </select>
           <button 
             onClick={fetchAnalyticsData}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+            className="bg-gold text-black text-sm px-4 py-2 rounded-lg hover:bg-gold/70 flex items-center space-x-2 cursor-pointer font-semibold"
           >
-            <span>🔄</span>
             <span>Refresh</span>
           </button>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+          <button className="bg-black text-white px-4 py-2 rounded-lg hover:black/70 cursor-pointer text-sm font-semibold">
             Export Report
           </button>
         </div>
@@ -217,7 +216,7 @@ const Analytics = () => {
                 <div className="flex items-center space-x-3">
                   <div className="w-32 bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full" 
+                      className="bg-black h-2 rounded-full" 
                       style={{ 
                         width: `${(item.deliveries / getMaxDeliveries()) * 100}%` 
                       }}
@@ -283,23 +282,23 @@ const Analytics = () => {
 
       {/* Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-6 text-center">
+        <div className="bg-gold text-black rounded-lg shadow border border-gray-200 p-6 text-center">
           <div className="text-2xl font-bold text-blue-600">
             {analyticsData.performanceMetrics.onTimeRate}%
           </div>
           <div className="text-sm text-gray-600">On-time Delivery Rate</div>
         </div>
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-6 text-center">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="bg-gradient-to-r from-gold/30 to-black/30 rounded-lg shadow border border-gray-200 p-6 text-center">
+          <div className="text-2xl font-bold text-black">
             {analyticsData.performanceMetrics.satisfactionRate}/5
           </div>
           <div className="text-sm text-gray-600">Customer Satisfaction</div>
         </div>
-        <div className="bg-white rounded-lg shadow border border-gray-200 p-6 text-center">
-          <div className="text-2xl font-bold text-purple-600">
+        <div className="bg-black text-white rounded-lg shadow border border-gray-200 p-6 text-center">
+          <div className="text-2xl font-bold text-white">
             {analyticsData.performanceMetrics.avgDeliveryTime}h
           </div>
-          <div className="text-sm text-gray-600">Average Delivery Time</div>
+          <div className="text-sm text-white/90">Average Delivery Time</div>
         </div>
       </div>
     </div>

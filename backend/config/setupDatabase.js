@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
     phone VARCHAR(20),
     user_type VARCHAR(20) DEFAULT 'personal' CHECK (user_type IN ('personal', 'corporate')),
     company_name VARCHAR(255),
+    is_admin BOOLEAN DEFAULT false,  -- NEW COLUMN
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -35,7 +36,7 @@ CREATE TABLE IF NOT EXISTS drivers (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Deliveries table
+-- Deliveries table (UPDATED with pricing columns)
 CREATE TABLE IF NOT EXISTS deliveries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tracking_number VARCHAR(50) UNIQUE NOT NULL,
@@ -46,6 +47,15 @@ CREATE TABLE IF NOT EXISTS deliveries (
     recipient_phone VARCHAR(20) NOT NULL,
     package_description TEXT,
     package_weight DECIMAL(8,2),
+    
+    -- NEW: Pricing and boxes columns
+    number_of_boxes INTEGER DEFAULT 1,
+    zone VARCHAR(20),
+    base_price DECIMAL(10,2) DEFAULT 0,
+    additional_box_price DECIMAL(10,2) DEFAULT 0,
+    total_price DECIMAL(10,2) DEFAULT 0,
+    price_breakdown JSONB,
+    
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled')),
     assigned_driver_id UUID REFERENCES drivers(id),
     pickup_date TIMESTAMPTZ,
@@ -54,10 +64,12 @@ CREATE TABLE IF NOT EXISTS deliveries (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes for better performance
+-- Indexes for better performance (UPDATED with new indexes)
 CREATE INDEX IF NOT EXISTS idx_deliveries_user_id ON deliveries(user_id);
 CREATE INDEX IF NOT EXISTS idx_deliveries_tracking_number ON deliveries(tracking_number);
 CREATE INDEX IF NOT EXISTS idx_deliveries_status ON deliveries(status);
+CREATE INDEX IF NOT EXISTS idx_deliveries_zone ON deliveries(zone);
+CREATE INDEX IF NOT EXISTS idx_deliveries_total_price ON deliveries(total_price);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- Insert sample driver (only if not exists)

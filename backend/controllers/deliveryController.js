@@ -7,7 +7,7 @@ const generateTrackingNumber = () => {
 };
 
 export const deliveryController = {
-  // Create delivery
+  // Create delivery - UPDATED to include pricing data
   async createDelivery(req, res) {
     try {
       const {
@@ -17,6 +17,11 @@ export const deliveryController = {
         recipientPhone,
         packageDescription,
         packageWeight,
+        numberOfBoxes = 1,
+        zone,
+        basePrice = 0,
+        additionalBoxPrice = 0,
+        totalPrice = 0,
       } = req.body;
 
       // Validate required fields
@@ -38,11 +43,21 @@ export const deliveryController = {
         recipientPhone,
         packageDescription: packageDescription || "",
         packageWeight: packageWeight || null,
+        numberOfBoxes,
+        zone,
+        basePrice,
+        additionalBoxPrice,
+        totalPrice,
       });
 
-      console.log("✅ Delivery created successfully:", delivery.id);
+      console.log("✅ Delivery created successfully with pricing:", {
+        id: delivery.id,
+        trackingNumber: delivery.tracking_number,
+        boxes: delivery.number_of_boxes,
+        totalPrice: delivery.total_price,
+      });
       
-      // Emit event to admins
+      // Emit event to admins with pricing info
       if (delivery) {
         emitToAdmins("delivery_created", {
           id: delivery.id,
@@ -50,6 +65,9 @@ export const deliveryController = {
           customer_name: `${req.user.first_name} ${req.user.last_name}`,
           recipient_name: delivery.recipient_name,
           status: delivery.status,
+          number_of_boxes: delivery.number_of_boxes,
+          total_price: delivery.total_price,
+          zone: delivery.zone,
           created_at: delivery.created_at,
           timestamp: new Date(),
         });
@@ -58,7 +76,7 @@ export const deliveryController = {
       res.status(201).json({
         success: true,
         message: "Delivery created successfully",
-        data: {  // CHANGED: Wrap in data object
+        data: {
           delivery: {
             id: delivery.id,
             trackingNumber: delivery.tracking_number,
@@ -66,6 +84,11 @@ export const deliveryController = {
             recipientName: delivery.recipient_name,
             pickupAddress: delivery.pickup_address,
             deliveryAddress: delivery.delivery_address,
+            numberOfBoxes: delivery.number_of_boxes,
+            zone: delivery.zone,
+            basePrice: delivery.base_price,
+            additionalBoxPrice: delivery.additional_box_price,
+            totalPrice: delivery.total_price,
             createdAt: delivery.created_at
           }
         }
@@ -86,7 +109,7 @@ export const deliveryController = {
       const deliveries = await Delivery.findByUserId(req.userId);
       res.json({
         success: true,
-        data: {  // CHANGED: Wrap in data object
+        data: {
           deliveries
         }
       });
@@ -114,7 +137,7 @@ export const deliveryController = {
 
       res.json({
         success: true,
-        data: {  // CHANGED: Wrap in data object
+        data: {
           delivery
         }
       });
@@ -127,7 +150,7 @@ export const deliveryController = {
     }
   },
 
-  // Get all deliveries (admin)
+  // Get all deliveries (admin) - UNCHANGED
   async getAllDeliveries(req, res) {
     try {
       const { page = 1, limit = 10 } = req.query;
@@ -139,7 +162,7 @@ export const deliveryController = {
 
       res.json({
         success: true,
-        data: {  // CHANGED: Wrap in data object
+        data: {
           deliveries,
           pagination: {
             page: parseInt(page),
@@ -154,6 +177,55 @@ export const deliveryController = {
       res.status(500).json({
         success: false,
         message: "Server error while fetching deliveries",
+      });
+    }
+  },
+
+  // NEW: Get delivery revenue statistics
+  async getRevenueStats(req, res) {
+    try {
+      const stats = await Delivery.getRevenueStats();
+      
+      // Calculate additional metrics
+      const averageBoxesPerDelivery = stats.total_boxes / Math.max(stats.total_deliveries, 1);
+      const completionRate = (stats.completed_deliveries / Math.max(stats.total_deliveries, 1)) * 100;
+      
+      res.json({
+        success: true,
+        data: {
+          ...stats,
+          averageBoxesPerDelivery: parseFloat(averageBoxesPerDelivery.toFixed(2)),
+          completionRate: parseFloat(completionRate.toFixed(2)),
+          deliveredRevenue: parseFloat(stats.delivered_revenue),
+          totalRevenue: parseFloat(stats.total_revenue),
+        }
+      });
+    } catch (error) {
+      console.error("❌ Get revenue stats error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Server error while fetching revenue statistics",
+      });
+    }
+  },
+
+  // NEW: Get zone-wise statistics
+  async getZoneStats(req, res) {
+    try {
+      const zoneStats = await Delivery.getZoneStats();
+      
+      res.json({
+        success: true,
+        data: {
+          zones: zoneStats,
+          totalZones: zoneStats.length
+        }
+      });
+    } catch (error) {
+      console.error("❌ Get zone stats error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Server error while fetching zone statistics",
       });
     }
   },
