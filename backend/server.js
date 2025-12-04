@@ -161,6 +161,37 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: '🚀 OTE Deliveries Backend API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      deliveries: '/api/deliveries',
+      admin: '/api/admin',
+      drivers: '/api/drivers',
+      health: '/api/health'
+    },
+    documentation: 'Coming soon...'
+  });
+});
+
+// Optional: Add a /api route
+app.get('/api', (req, res) => {
+  res.json({
+    success: true,
+    message: 'OTE Deliveries API',
+    availableEndpoints: [
+      '/api/auth',
+      '/api/deliveries', 
+      '/api/admin',
+      '/api/drivers',
+      '/api/health'
+    ]
+  });
+});
+
 // 404 handler
 app.use("*", (req, res) => {
   res.status(404).json({
