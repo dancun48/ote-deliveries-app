@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
+import pool from './config/database.js';
 
 import { testConnection } from "./config/database.js";
 import authRoutes from "./routes/auth.js";
