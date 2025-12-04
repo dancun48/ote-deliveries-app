@@ -1,0 +1,7 @@
+# Add these lines to your .gitignore
+.env
+.env.local
+.env.production
+.env.production.local
+.env.development
+.env.test
