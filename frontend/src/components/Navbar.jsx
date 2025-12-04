@@ -106,7 +106,7 @@ const Navbar = () => {
                 {/* Admin Navigation (only for admin users) - CHANGED TO <a> TAG */}
                 {user.isAdmin && (
                   <a
-                    href="http://localhost:5174"
+                    href="https://oteadmin.vercel.app"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium px-1 py-2 transition-all duration-300 hover:text-red-400 relative text-sm lg:text-base flex items-center space-x-1"

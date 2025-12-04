@@ -24,7 +24,7 @@ const Footer = () => {
                 />
               </div>
               <span className="text-lg md:text-xl font-bold text-gold">
-                Ote Deliveries
+                OTE Logistics Ltd.
               </span>
             </Link>
             <p className="text-gray-300 mb-4 text-sm md:text-base">
@@ -118,7 +118,7 @@ const Footer = () => {
 
         <div className="flex flex-col sm:flex-row justify-between items-center border-t border-gray-700 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-gray-400 text-xs md:text-sm space-y-2 sm:space-y-0">
           <div>
-            <p>&copy; 2025 Ote Deliveries. All rights reserved.</p>
+            <p>&copy; 2025 OTE Logistics Ltd. All rights reserved.</p>
           </div>
           <div className="flex flex-row gap-3 md:gap-4">
             <a
