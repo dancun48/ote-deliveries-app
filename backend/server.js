@@ -250,6 +250,44 @@ app.get('/api/db-structure', async (req, res) => {
     });
   }
 });
+// In server.js, add this route
+app.get('/api/check-db', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    
+    // Check if users table exists
+    const tableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+      )
+    `);
+    
+    // Get user count
+    const userCount = await client.query('SELECT COUNT(*) FROM users');
+    
+    // List all users
+    const users = await client.query('SELECT id, email, first_name, last_name, is_admin FROM users');
+    
+    client.release();
+    
+    res.json({
+      success: true,
+      database: {
+        usersTableExists: tableCheck.rows[0].exists,
+        userCount: parseInt(userCount.rows[0].count),
+        users: users.rows
+      }
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
 
 
 // Start server with graceful database handling
