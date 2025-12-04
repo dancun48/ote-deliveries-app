@@ -180,31 +180,27 @@ app.use((error, req, res, next) => {
 
 // Start server with graceful database handling
 const startServer = async () => {
-  try {
-    // Try to connect to database
-    const dbConnected = await testConnection();
-    if (dbConnected) {
-      console.log("✅ Database connected successfully");
-    } else {
-      console.log("⚠️  Database connection failed, but starting server anyway");
-      console.log("⚠️  Some database-dependent features may not work");
-    }
-
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-      console.log(`🌐 Allowed Origins: ${allowedOrigins.join(", ")}`);
-    });
-  } catch (error) {
-    console.error("❌ Failed to start server:", error.message);
-    console.log("⚠️  Starting server in limited mode without database...");
-
-    // Start server anyway (without database)
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running in limited mode on port ${PORT}`);
-      console.log("⚠️  Database-dependent features disabled");
-    });
-  }
+  // Start server immediately
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`🌐 Allowed Origins: ${allowedOrigins.join(", ")}`);
+    
+    // Try database connection in background (non-blocking)
+    setTimeout(async () => {
+      try {
+        const dbConnected = await testConnection();
+        if (dbConnected) {
+          console.log("✅ Database connected successfully");
+        } else {
+          console.log("⚠️  Running without database connection");
+          console.log("⚠️  Some database-dependent features may not work");
+        }
+      } catch (error) {
+        console.log("⚠️  Database connection failed silently:", error.message);
+      }
+    }, 2000); // Delay to let server start first
+  });
 };
 
 // Handle uncaught exceptions
