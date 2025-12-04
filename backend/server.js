@@ -230,6 +230,40 @@ app.get('/api/check-db', async (req, res) => {
   }
 });
 
+// In server.js, add this route
+app.get('/api/debug-users', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    
+    // Get all users with full details
+    const usersResult = await client.query('SELECT * FROM users');
+    
+    // Check table structure
+    const tableInfo = await client.query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'users' 
+      ORDER BY ordinal_position
+    `);
+    
+    client.release();
+    
+    res.json({
+      success: true,
+      usersCount: usersResult.rows.length,
+      users: usersResult.rows,
+      tableStructure: tableInfo.rows,
+      rawQuery: 'SELECT * FROM users'
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
+});
 // 404 handler
 app.use("*", (req, res) => {
   res.status(404).json({
