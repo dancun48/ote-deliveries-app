@@ -250,6 +250,8 @@ app.get('/api/db-structure', async (req, res) => {
     });
   }
 });
+
+
 // Start server with graceful database handling
 const startServer = async () => {
   // Start server immediately
