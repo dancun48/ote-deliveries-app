@@ -191,65 +191,6 @@ app.get('/api', (req, res) => {
     ]
   });
 });
-
-// 404 handler
-app.use("*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
-});
-
-// Error handling middleware
-app.use((error, req, res, next) => {
-  console.error("Error:", error);
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-  });
-});
-
-app.get('/api/db-structure', async (req, res) => {
-  try {
-    const client = await pool.connect();
-    
-    // Get all tables
-    const tablesResult = await client.query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public'
-      ORDER BY table_name
-    `);
-    
-    // Get table structures
-    const tableStructures = {};
-    for (const table of tablesResult.rows) {
-      const columnsResult = await client.query(`
-        SELECT column_name, data_type, is_nullable
-        FROM information_schema.columns
-        WHERE table_name = $1
-        ORDER BY ordinal_position
-      `, [table.table_name]);
-      
-      tableStructures[table.table_name] = columnsResult.rows;
-    }
-    
-    client.release();
-    
-    res.json({
-      success: true,
-      tables: tablesResult.rows,
-      structures: tableStructures
-    });
-    
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      tables: []
-    });
-  }
-});
 // In server.js, add this route
 app.get('/api/check-db', async (req, res) => {
   try {
@@ -289,6 +230,22 @@ app.get('/api/check-db', async (req, res) => {
   }
 });
 
+// 404 handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
+});
+
+// Error handling middleware
+app.use((error, req, res, next) => {
+  console.error("Error:", error);
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+  });
+});
 
 // Start server with graceful database handling
 const startServer = async () => {
