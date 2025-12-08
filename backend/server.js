@@ -192,35 +192,26 @@ app.get('/api', (req, res) => {
     ]
   });
 });
-// In server.js, add this route
-app.get('/api/check-db', async (req, res) => {
+
+app.get('/api/test-db', async (req, res) => {
   try {
     const client = await pool.connect();
     
-    // Check if users table exists
-    const tableCheck = await client.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'users'
-      )
+    // Test query
+    const result = await client.query('SELECT version()');
+    const tables = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
     `);
-    
-    // Get user count
-    const userCount = await client.query('SELECT COUNT(*) FROM users');
-    
-    // List all users
-    const users = await client.query('SELECT id, email, first_name, last_name, is_admin FROM users');
     
     client.release();
     
     res.json({
       success: true,
-      database: {
-        usersTableExists: tableCheck.rows[0].exists,
-        userCount: parseInt(userCount.rows[0].count),
-        users: users.rows
-      }
+      postgresVersion: result.rows[0].version,
+      tables: tables.rows,
+      connection: 'Working'
     });
     
   } catch (error) {
@@ -231,40 +222,6 @@ app.get('/api/check-db', async (req, res) => {
   }
 });
 
-// In server.js, add this route
-app.get('/api/debug-users', async (req, res) => {
-  try {
-    const client = await pool.connect();
-    
-    // Get all users with full details
-    const usersResult = await client.query('SELECT * FROM users');
-    
-    // Check table structure
-    const tableInfo = await client.query(`
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_name = 'users' 
-      ORDER BY ordinal_position
-    `);
-    
-    client.release();
-    
-    res.json({
-      success: true,
-      usersCount: usersResult.rows.length,
-      users: usersResult.rows,
-      tableStructure: tableInfo.rows,
-      rawQuery: 'SELECT * FROM users'
-    });
-    
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      stack: error.stack
-    });
-  }
-});
 // 404 handler
 app.use("*", (req, res) => {
   res.status(404).json({
