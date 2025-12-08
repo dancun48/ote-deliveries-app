@@ -81,30 +81,47 @@ export const authController = {
 
   // ------Login user------
   async login(req, res) {
-    try {
-      const { email, password } = req.body;
-
-      console.log('🔐 Login attempt for:', email);
-
-      // Find user
-      const user = await User.findByEmail(email);
-      if (!user) {
-        console.log('❌ User not found:', email);
-        return res.status(400).json({ 
-          success: false,
-          message: 'Invalid email or password' 
-        });
-      }
-
-      // -------Check password--------
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        console.log('❌ Invalid password for:', email);
-        return res.status(400).json({ 
-          success: false,
-          message: 'Invalid email or password' 
-        });
-      }
+  try {
+    const { email, password } = req.body;
+    
+    console.log('=== LOGIN DEBUG START ===');
+    console.log('Email:', email);
+    console.log('Password provided:', password);
+    
+    // Find user
+    const user = await User.findByEmail(email);
+    console.log('User found:', user ? 'Yes' : 'No');
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
+    console.log('User from DB:', {
+      email: user.email,
+      passwordHash: user.password,
+      hashLength: user.password.length,
+      hashStartsWith: user.password.substring(0, 30)
+    });
+    
+    // Test bcrypt
+    console.log('Testing bcrypt...');
+    const testMatch = await bcrypt.compare('password123', user.password);
+    console.log('Bcrypt test with "password123":', testMatch);
+    
+    // Try actual password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Bcrypt compare result:', isPasswordValid);
+    
+    if (!isPasswordValid) {
+      console.log('PASSWORD MISMATCH!');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
 
       const token = generateToken(user.id);
 
