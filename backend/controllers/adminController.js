@@ -366,252 +366,321 @@ export const adminController = {
   },
 
   // -----Assign driver to delivery------
-async assignDriverToDelivery(req, res) {
-  try {
-    const { deliveryId } = req.params;
-    const { driver_id } = req.body;
-
-    console.log('🚗 Assigning driver to delivery:', { deliveryId, driver_id });
-
-    // Validate input
-    if (!driver_id) {
-      return res.status(400).json({
-        success: false,
-        message: 'Driver ID is required'
-      });
-    }
-
-    // Validate UUID format
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(deliveryId) || !uuidRegex.test(driver_id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid ID format. Must be valid UUID.'
-      });
-    }
-
-    // Start a transaction for multiple operations
-    const client = await pool.connect();
-    
+  async assignDriverToDelivery(req, res) {
     try {
-      await client.query('BEGIN');
+      const { deliveryId } = req.params;
+      const { driver_id } = req.body;
 
-      // Check if delivery exists and is in pending status
-      const deliveryCheck = await client.query(
-        'SELECT id, status FROM deliveries WHERE id = $1 FOR UPDATE',
-        [deliveryId]
-      );
-      
-      if (deliveryCheck.rows.length === 0) {
-        await client.query('ROLLBACK');
-        return res.status(404).json({
-          success: false,
-          message: 'Delivery not found'
-        });
-      }
+      console.log("🚗 Assigning driver to delivery:", {
+        deliveryId,
+        driver_id,
+      });
 
-      const delivery = deliveryCheck.rows[0];
-      
-      if (delivery.status !== 'pending') {
-        await client.query('ROLLBACK');
+      // Validate input
+      if (!driver_id) {
         return res.status(400).json({
           success: false,
-          message: `Cannot assign driver to delivery with status: ${delivery.status}. Delivery must be in 'pending' status.`
+          message: "Driver ID is required",
         });
       }
 
-      // Check if driver exists and is active
-      const driverCheck = await client.query(
-        'SELECT id, name, is_active FROM drivers WHERE id = $1 FOR UPDATE',
-        [driver_id]
-      );
-      
-      if (driverCheck.rows.length === 0) {
-        await client.query('ROLLBACK');
-        return res.status(404).json({
-          success: false,
-          message: 'Driver not found'
-        });
-      }
+      // REMOVE UUID VALIDATION - Accept both integers and UUIDs
+      // Convert to numbers if they're numeric strings
+      const deliveryIdNum = isNaN(deliveryId)
+        ? deliveryId
+        : parseInt(deliveryId);
+      const driverIdNum = isNaN(driver_id) ? driver_id : parseInt(driver_id);
 
-      const driver = driverCheck.rows[0];
-      if (!driver.is_active) {
-        await client.query('ROLLBACK');
-        return res.status(400).json({
-          success: false,
-          message: 'Driver is not active and cannot be assigned'
-        });
-      }
+      console.log("📊 Parsed IDs:", { deliveryIdNum, driverIdNum });
 
-      // Check if driver is already assigned to another active delivery
-      const activeAssignmentCheck = await client.query(
-        `SELECT id FROM deliveries 
+      // Start a transaction for multiple operations
+      const client = await pool.connect();
+
+      try {
+        await client.query("BEGIN");
+
+        // Check if delivery exists and is in pending status
+        const deliveryCheck = await client.query(
+          "SELECT id, status FROM deliveries WHERE id = $1 FOR UPDATE",
+          [deliveryIdNum]
+        );
+
+        if (deliveryCheck.rows.length === 0) {
+          await client.query("ROLLBACK");
+          return res.status(404).json({
+            success: false,
+            message: "Delivery not found",
+          });
+        }
+
+        const delivery = deliveryCheck.rows[0];
+
+        if (delivery.status !== "pending" && delivery.status !== "assigned") {
+          await client.query("ROLLBACK");
+          return res.status(400).json({
+            success: false,
+            message: `Cannot assign driver to delivery with status: ${delivery.status}. Delivery must be in 'pending' or 'assigned' status.`,
+          });
+        }
+
+        // Check if driver exists and is active
+        const driverCheck = await client.query(
+          "SELECT id, name, is_active FROM drivers WHERE id = $1 FOR UPDATE",
+          [driverIdNum]
+        );
+
+        if (driverCheck.rows.length === 0) {
+          await client.query("ROLLBACK");
+          return res.status(404).json({
+            success: false,
+            message: "Driver not found",
+          });
+        }
+
+        const driver = driverCheck.rows[0];
+        if (!driver.is_active) {
+          await client.query("ROLLBACK");
+          return res.status(400).json({
+            success: false,
+            message: "Driver is not active and cannot be assigned",
+          });
+        }
+
+        // Check if driver is already assigned to another active delivery
+        const activeAssignmentCheck = await client.query(
+          `SELECT id, tracking_number FROM deliveries 
          WHERE assigned_driver_id = $1 
-         AND status IN ('assigned', 'picked_up', 'in_transit')`,
-        [driver_id]
-      );
+         AND status IN ('assigned', 'picked_up', 'in_transit')
+         AND id != $2`,
+          [driverIdNum, deliveryIdNum]
+        );
 
-      if (activeAssignmentCheck.rows.length > 0) {
-        await client.query('ROLLBACK');
-        return res.status(400).json({
-          success: false,
-          message: 'Driver is already assigned to an active delivery'
-        });
-      }
+        if (activeAssignmentCheck.rows.length > 0) {
+          await client.query("ROLLBACK");
+          return res.status(400).json({
+            success: false,
+            message: `Driver is already assigned to delivery ${activeAssignmentCheck.rows[0].tracking_number}`,
+          });
+        }
 
-      // Update delivery with assigned driver and set status to 'in_transit'
-      const updateDeliveryQuery = `
+        // Update delivery with assigned driver
+        const updateDeliveryQuery = `
         UPDATE deliveries 
-        SET assigned_driver_id = $1, status = 'in_transit', updated_at = CURRENT_TIMESTAMP
+        SET assigned_driver_id = $1, 
+            status = CASE 
+              WHEN status = 'pending' THEN 'assigned'
+              ELSE status 
+            END,
+            updated_at = CURRENT_TIMESTAMP
         WHERE id = $2
         RETURNING *
       `;
 
-      const result = await client.query(updateDeliveryQuery, [driver_id, deliveryId]);
-      const updatedDelivery = result.rows[0];
+        const result = await client.query(updateDeliveryQuery, [
+          driverIdNum,
+          deliveryIdNum,
+        ]);
+        const updatedDelivery = result.rows[0];
 
-      console.log('✅ Driver assigned successfully to delivery:', deliveryId);
+        console.log("✅ Driver assigned successfully:", {
+          deliveryId: updatedDelivery.id,
+          driverId: driverIdNum,
+          newStatus: updatedDelivery.status,
+        });
 
-      // Emit real-time update
-      if (req.io) {
-        req.io.to('admins').emit('driver_assigned', updatedDelivery);
-        req.io.to('drivers').emit('new_assignment', updatedDelivery);
-      }
+        // Create tracking update
+        await client.query(
+          `INSERT INTO delivery_updates (delivery_id, status, notes)
+         VALUES ($1, $2, $3)`,
+          [
+            deliveryIdNum,
+            "driver_assigned",
+            `Driver ${driver.name} assigned to delivery`,
+          ]
+        );
 
-      await client.query('COMMIT');
+        // Emit real-time update
+        try {
+          if (req.io || global.io) {
+            const io = req.io || global.io;
+            io.to("admins").emit("driver_assigned", {
+              deliveryId: updatedDelivery.id,
+              trackingNumber: updatedDelivery.tracking_number,
+              driverId: driverIdNum,
+              driverName: driver.name,
+              status: updatedDelivery.status,
+              timestamp: new Date().toISOString(),
+            });
 
-      res.json({
-        success: true,
-        message: 'Driver assigned successfully and delivery status updated to in transit',
-        data: {
-          delivery: updatedDelivery
+            // Emit to specific driver room if you have one
+            io.to(`driver_${driverIdNum}`).emit("new_assignment", {
+              deliveryId: updatedDelivery.id,
+              trackingNumber: updatedDelivery.tracking_number,
+              pickupAddress: updatedDelivery.pickup_address,
+              deliveryAddress: updatedDelivery.delivery_address,
+              recipientName: updatedDelivery.recipient_name,
+            });
+          }
+        } catch (websocketError) {
+          console.log("⚠️ WebSocket emit failed:", websocketError.message);
+          // Don't fail the whole request if WebSocket fails
         }
-      });
 
+        await client.query("COMMIT");
+
+        res.json({
+          success: true,
+          message: `Driver ${driver.name} assigned successfully`,
+          data: {
+            delivery: updatedDelivery,
+            driver: {
+              id: driver.id,
+              name: driver.name,
+            },
+          },
+        });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        console.error("❌ Transaction error:", error);
+        throw error;
+      } finally {
+        client.release();
+      }
     } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
+      console.error("❌ Assign driver error:", error);
 
-  } catch (error) {
-    console.error('❌ Assign driver error:', error);
-    
-    if (error.code === '22P02') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid ID format. Please check the delivery and driver IDs are valid UUIDs.'
-      });
-    }
-    
-    res.status(500).json({
-      success: false,
-      message: 'Server error while assigning driver'
-    });
-  }
-},
-
-// -----Update delivery status with driver availability logic------
-async updateDeliveryStatus(req, res) {
-  try {
-    const { deliveryId } = req.params;
-    const { status } = req.body;
-
-    const validStatuses = ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered', 'cancelled'];
-    
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status. Must be one of: ' + validStatuses.join(', ')
-      });
-    }
-
-    const client = await pool.connect();
-    
-    try {
-      await client.query('BEGIN');
-
-      // Get current delivery details including assigned driver
-      const currentDelivery = await client.query(
-        'SELECT id, status, assigned_driver_id FROM deliveries WHERE id = $1 FOR UPDATE',
-        [deliveryId]
-      );
-
-      if (currentDelivery.rows.length === 0) {
-        await client.query('ROLLBACK');
-        return res.status(404).json({
+      // Handle specific PostgreSQL errors
+      if (error.code === "22P02") {
+        return res.status(400).json({
           success: false,
-          message: 'Delivery not found'
+          message: "Invalid ID format. IDs must be valid numbers or UUIDs.",
         });
       }
 
-      const delivery = currentDelivery.rows[0];
-      const previousDriverId = delivery.assigned_driver_id;
+      res.status(500).json({
+        success: false,
+        message: "Server error while assigning driver",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+  },
 
-      // Update delivery status
-      const updateQuery = `
+  // -----Update delivery status with driver availability logic------
+  async updateDeliveryStatus(req, res) {
+    try {
+      const { deliveryId } = req.params;
+      const { status } = req.body;
+
+      const validStatuses = [
+        "pending",
+        "assigned",
+        "picked_up",
+        "in_transit",
+        "delivered",
+        "cancelled",
+      ];
+
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid status. Must be one of: " + validStatuses.join(", "),
+        });
+      }
+
+      const client = await pool.connect();
+
+      try {
+        await client.query("BEGIN");
+
+        // Get current delivery details including assigned driver
+        const currentDelivery = await client.query(
+          "SELECT id, status, assigned_driver_id FROM deliveries WHERE id = $1 FOR UPDATE",
+          [deliveryId]
+        );
+
+        if (currentDelivery.rows.length === 0) {
+          await client.query("ROLLBACK");
+          return res.status(404).json({
+            success: false,
+            message: "Delivery not found",
+          });
+        }
+
+        const delivery = currentDelivery.rows[0];
+        const previousDriverId = delivery.assigned_driver_id;
+
+        // Update delivery status
+        const updateQuery = `
         UPDATE deliveries 
         SET status = $1, updated_at = CURRENT_TIMESTAMP 
         WHERE id = $2 
         RETURNING *
       `;
-      
-      const result = await client.query(updateQuery, [status, deliveryId]);
-      const updatedDelivery = result.rows[0];
 
-      // Handle driver availability based on status changes
-      if (previousDriverId) {
-        if (status === 'delivered' || status === 'cancelled') {
-          // Driver becomes available when delivery is completed or cancelled
-          await client.query(
-            'UPDATE drivers SET is_active = true WHERE id = $1',
-            [previousDriverId]
-          );
-          console.log(`✅ Driver ${previousDriverId} set to available (delivery ${status})`);
-        } else if (status === 'in_transit' && delivery.status !== 'in_transit') {
-          // Driver becomes unavailable when delivery goes in transit
-          await client.query(
-            'UPDATE drivers SET is_active = false WHERE id = $1',
-            [previousDriverId]
-          );
-          console.log(`✅ Driver ${previousDriverId} set to unavailable (delivery in transit)`);
-        }
-      }
+        const result = await client.query(updateQuery, [status, deliveryId]);
+        const updatedDelivery = result.rows[0];
 
-      await client.query('COMMIT');
-
-      // Emit real-time update
-      if (req.io) {
-        req.io.to('admins').emit('delivery_status_updated', updatedDelivery);
+        // Handle driver availability based on status changes
         if (previousDriverId) {
-          req.io.to(`driver_${previousDriverId}`).emit('assignment_updated', updatedDelivery);
+          if (status === "delivered" || status === "cancelled") {
+            // Driver becomes available when delivery is completed or cancelled
+            await client.query(
+              "UPDATE drivers SET is_active = true WHERE id = $1",
+              [previousDriverId]
+            );
+            console.log(
+              `✅ Driver ${previousDriverId} set to available (delivery ${status})`
+            );
+          } else if (
+            status === "in_transit" &&
+            delivery.status !== "in_transit"
+          ) {
+            // Driver becomes unavailable when delivery goes in transit
+            await client.query(
+              "UPDATE drivers SET is_active = false WHERE id = $1",
+              [previousDriverId]
+            );
+            console.log(
+              `✅ Driver ${previousDriverId} set to unavailable (delivery in transit)`
+            );
+          }
         }
+
+        await client.query("COMMIT");
+
+        // Emit real-time update
+        if (req.io) {
+          req.io.to("admins").emit("delivery_status_updated", updatedDelivery);
+          if (previousDriverId) {
+            req.io
+              .to(`driver_${previousDriverId}`)
+              .emit("assignment_updated", updatedDelivery);
+          }
+        }
+
+        res.json({
+          success: true,
+          message: "Delivery status updated successfully",
+          data: {
+            delivery: updatedDelivery,
+          },
+        });
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      } finally {
+        client.release();
       }
-
-      res.json({
-        success: true,
-        message: 'Delivery status updated successfully',
-        data: {
-          delivery: updatedDelivery
-        }
-      });
-
     } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
+      console.error("❌ Update delivery status error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Server error while updating delivery status",
+      });
     }
-
-  } catch (error) {
-    console.error('❌ Update delivery status error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Server error while updating delivery status' 
-    });
-  }
-},
+  },
   // -----Get available drivers------
   async getAvailableDrivers(req, res) {
     try {

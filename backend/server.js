@@ -66,7 +66,8 @@ const io = new Server(server, {
 // Rate limiting - increase for production
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "production" ? 1000 : 100,
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
 });
 
 // Middleware
@@ -219,6 +220,36 @@ app.get('/api/test-db', async (req, res) => {
       success: false,
       error: error.message
     });
+  }
+});
+// In server.js
+app.get('/api/health-detailed', async (req, res) => {
+  const health = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    services: {
+      database: 'checking...',
+      websocket: 'checking...',
+      memory: process.memoryUsage()
+    }
+  };
+  
+  try {
+    // Check database
+    const dbCheck = await pool.query('SELECT 1');
+    health.services.database = 'connected';
+    
+    // Check WebSocket
+    health.services.websocket = {
+      connectedClients: io.engine.clientsCount,
+      connectedAdmins: io.sockets.adapter.rooms.get('admins')?.size || 0
+    };
+    
+    res.json(health);
+  } catch (error) {
+    health.status = 'unhealthy';
+    health.services.database = 'disconnected: ' + error.message;
+    res.status(503).json(health);
   }
 });
 
