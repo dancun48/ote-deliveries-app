@@ -4,10 +4,33 @@ import { User } from '../models/User.js';
 import { emitToAdmins } from '../server.js';
 
 // Generate JWT Token
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { 
-    expiresIn: process.env.JWT_EXPIRES_IN 
-  });
+const generateToken = (userId, isAdmin = false) => {
+  // Default to '7d' if env var is not set or invalid
+  let expiresIn = '7d';
+  
+  if (process.env.JWT_EXPIRES_IN) {
+    // Validate the expiresIn format
+    const validFormats = ['d', 'h', 'm', 's'];
+    const regex = new RegExp(`^\\d+(${validFormats.join('|')})$`);
+    
+    if (regex.test(process.env.JWT_EXPIRES_IN)) {
+      expiresIn = process.env.JWT_EXPIRES_IN;
+    } else {
+      console.warn(`⚠️ Invalid JWT_EXPIRES_IN format: ${process.env.JWT_EXPIRES_IN}, using default '7d'`);
+    }
+  }
+  
+  return jwt.sign(
+    { 
+      userId, 
+      isAdmin,
+      timestamp: Date.now() 
+    }, 
+    process.env.JWT_SECRET || 'fallback-secret-key-change-in-production',
+    { 
+      expiresIn: expiresIn
+    }
+  );
 };
 
 export const authController = {
@@ -39,7 +62,7 @@ export const authController = {
         companyName
       });
 
-      const token = generateToken(user.id);
+      const token = generateToken(user.id, user.is_admin);
 
       // Emit event to admins
       if (user) {
@@ -83,38 +106,18 @@ export const authController = {
   async login(req, res) {
   try {
     const { email, password } = req.body;
-    
-    console.log('=== LOGIN DEBUG START ===');
-    console.log('Email:', email);
-    console.log('Password provided:', password);
+      console.log('Login attempt for:', email);
     
     // Find user
-    const user = await User.findByEmail(email);
-    console.log('User found:', user ? 'Yes' : 'No');
-    
+    const user = await User.findByEmail(email);    
     if (!user) {
+      console.log('User not found for email:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
-    
-    console.log('User from DB:', {
-      email: user.email,
-      passwordHash: user.password,
-      hashLength: user.password.length,
-      hashStartsWith: user.password.substring(0, 30)
-    });
-    
-    // Test bcrypt
-    console.log('Testing bcrypt...');
-    const testMatch = await bcrypt.compare('password123', user.password);
-    console.log('Bcrypt test with "password123":', testMatch);
-    
-    // Try actual password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('Bcrypt compare result:', isPasswordValid);
-    
+    const isPasswordValid = await bcrypt.compare(password, user.password);    
     if (!isPasswordValid) {
       console.log('PASSWORD MISMATCH!');
       return res.status(401).json({
@@ -123,7 +126,7 @@ export const authController = {
       });
     }
 
-      const token = generateToken(user.id);
+      const token = generateToken(user.id, user.is_admin);
 
       res.json({
         success: true,
@@ -143,9 +146,13 @@ export const authController = {
 
     } catch (error) {
       console.error('❌ Login error:', error);
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+
       res.status(500).json({ 
         success: false,
-        message: 'Server error during login' 
+        message: 'Server error during login',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
   },

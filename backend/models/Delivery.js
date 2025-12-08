@@ -1,42 +1,38 @@
 import pool from "../config/database.js";
 
 export const Delivery = {
-  // Create new delivery - UPDATED
   async create(deliveryData) {
-    const {
-      trackingNumber,
-      userId,
-      pickupAddress,
-      deliveryAddress,
-      recipientName,
-      recipientPhone,
-      packageDescription,
-      packageWeight,
-      numberOfBoxes = 1,
-      zone = null,
-      basePrice = 0,
-      additionalBoxPrice = 0,
-      totalPrice = 0,
-    } = deliveryData;
+  const {
+    trackingNumber,
+    userId,
+    pickupAddress,
+    deliveryAddress,
+    recipientName,
+    recipientPhone,
+    packageDescription,
+    packageWeight,
+    numberOfBoxes = 1,
+    zone = null,
+    basePrice = 0,
+    additionalBoxPrice = 0,
+    totalPrice = 0,
+    status = 'pending'  // ADD THIS
+  } = deliveryData;
 
-    console.log("💾 Saving to database with pricing data:", {
-      trackingNumber,
-      userId,
-      numberOfBoxes,
-      zone,
-      totalPrice,
-    });
-
-    const query = `
-      INSERT INTO deliveries 
-      (tracking_number, user_id, pickup_address, delivery_address, 
-       recipient_name, recipient_phone, package_description, package_weight,
-       number_of_boxes, zone, base_price, additional_box_price, total_price,
-       price_breakdown)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-      RETURNING *
-    `;
-
+  // Check if price_breakdown column exists
+  const columnCheck = await pool.query(`
+    SELECT EXISTS (
+      SELECT FROM information_schema.columns 
+      WHERE table_name = 'deliveries' 
+      AND column_name = 'price_breakdown'
+    )
+  `);
+  
+  const hasPriceBreakdown = columnCheck.rows[0].exists;
+  
+  let query, values;
+  
+  if (hasPriceBreakdown) {
     const priceBreakdown = {
       numberOfBoxes,
       zone,
@@ -46,8 +42,18 @@ export const Delivery = {
       perBoxPrice: additionalBoxPrice > 0 ? additionalBoxPrice / (numberOfBoxes - 2) : 0,
       calculatedAt: new Date().toISOString()
     };
-
-    const values = [
+    
+    query = `
+      INSERT INTO deliveries 
+      (tracking_number, user_id, pickup_address, delivery_address, 
+       recipient_name, recipient_phone, package_description, package_weight,
+       number_of_boxes, zone, base_price, additional_box_price, total_price,
+       price_breakdown, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      RETURNING *
+    `;
+    
+    values = [
       trackingNumber,
       userId,
       pickupAddress,
@@ -62,14 +68,51 @@ export const Delivery = {
       additionalBoxPrice,
       totalPrice,
       JSON.stringify(priceBreakdown),
+      status
     ];
+  } else {
+    // Without price_breakdown column
+    query = `
+      INSERT INTO deliveries 
+      (tracking_number, user_id, pickup_address, delivery_address, 
+       recipient_name, recipient_phone, package_description, package_weight,
+       number_of_boxes, zone, base_price, additional_box_price, total_price,
+       status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      RETURNING *
+    `;
+    
+    values = [
+      trackingNumber,
+      userId,
+      pickupAddress,
+      deliveryAddress,
+      recipientName,
+      recipientPhone,
+      packageDescription,
+      packageWeight,
+      numberOfBoxes,
+      zone,
+      basePrice,
+      additionalBoxPrice,
+      totalPrice,
+      status
+    ];
+  }
 
-    console.log("📝 Executing query with values:", values);
+  console.log("📝 Executing query:", query);
+  console.log("📝 With values:", values);
+  
+  try {
     const result = await pool.query(query, values);
-    console.log("✅ Database insert successful with pricing:", result.rows[0].id);
+    console.log("✅ Database insert successful. ID:", result.rows[0].id);
     return result.rows[0];
-  },
-
+  } catch (error) {
+    console.error("❌ Database insert failed:", error.message);
+    console.error("Full error:", error);
+    throw error;
+  }
+},
   // Find by tracking number - UPDATED
   async findByTrackingNumber(trackingNumber) {
     const query = `
