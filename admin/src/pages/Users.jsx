@@ -251,7 +251,7 @@ const Users = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
-          <p className="text-gray-600">Manage customer accounts</p>
+          <p className="text-gray-500 text-sm">Manage customer accounts</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
