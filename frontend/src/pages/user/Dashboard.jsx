@@ -123,7 +123,7 @@ const Dashboard = () => {
                 </Link>
                 {user?.isAdmin && (
                   <a
-                    href="http://localhost:5174"
+                    href="https://oteadmin.vercel.app"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 bg-purple-600 text-white text-center py-3 px-4 rounded-md hover:bg-purple-700 transition duration-200 font-medium text-sm"
