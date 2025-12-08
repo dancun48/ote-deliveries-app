@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/images/logo.png';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -41,11 +42,11 @@ const Login = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="w-16 h-16 bg-black rounded-lg flex items-center justify-center text-white text-2xl font-bold">
-            ⚡
+            <img src={logo} alt="Logo" className='w-20' />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Admin Portal
+          OTE Admin Portal
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Delivery Management System

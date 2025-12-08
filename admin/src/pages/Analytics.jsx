@@ -180,7 +180,7 @@ const Analytics = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Analytics & Reports</h1>
-          <p className="text-gray-600">Real-time delivery performance and insights</p>
+          <p className="text-gray-500 text-sm">Real-time delivery performance and insights</p>
         </div>
         <div className="flex space-x-3">
           <select 

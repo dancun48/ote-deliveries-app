@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import notification from '../assets/images/not.png';
+import home from '../assets/images/home.png';
 
 const Header = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
@@ -49,7 +51,7 @@ const Header = ({ onMenuClick }) => {
         <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Notifications */}
           <button className="hidden sm:flex relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
-            <span className="text-xl">🔔</span>
+            <span className="text-xl"><img src={notification} alt="notification-bell" className='w-5' /></span>
             <span className="absolute top-0 right-0 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
               3
             </span>
@@ -57,13 +59,13 @@ const Header = ({ onMenuClick }) => {
 
           {/* Main App Link */}
           <a
-            href="http://localhost:5173"
+            href="https://oteuser.vercel.app"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:flex p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
             title="Go to Main App"
           >
-            <span className="text-xl">🌐</span>
+            <span className="text-xl"><img src={home} alt="home-button" className='w-8'/></span>
           </a>
 
           {/* User Menu */}
@@ -90,21 +92,21 @@ const Header = ({ onMenuClick }) => {
                 <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100 lg:hidden">
                   {user?.firstName} {user?.lastName}
                 </div>
-                <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
+                {/* <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
                   <span>👤</span>
                   <span>Profile</span>
                 </button>
                 <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
                   <span>⚙️</span>
                   <span>Settings</span>
-                </button>
+                </button> */}
                 <a
-                  href="http://localhost:5173"
+                  href="https://oteuser.vercel.app"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 lg:hidden"
                 >
-                  <span>🌐</span>
+                  <span><img src={home} alt="home-button" className='w-5'/></span>
                   <span>Main App</span>
                 </a>
                 <div className="border-t border-gray-200 my-1"></div>

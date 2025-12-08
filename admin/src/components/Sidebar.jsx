@@ -1,38 +1,45 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import driver from '../assets/images/driver.png';
+import analytics from '../assets/images/analy.png';
+import users from '../assets/images/users.png';
+import deli from '../assets/images/deli.png';
+import dash from '../assets/images/dash.png';
+import logo from '../assets/images/logo.png';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const menuItems = [
     {
       name: 'Dashboard',
       path: '/dashboard',
-      icon: '📊',
+      icon: dash,
       badge: null
     },
     {
       name: 'Deliveries',
       path: '/deliveries',
-      icon: '📦',
+      icon: deli,
       badge: null
     },
     {
       name: 'Users',
       path: '/users',
-      icon: '👥',
+      icon: users,
       badge: null
     },
     {
       name: 'Drivers',
       path: '/drivers',
-      icon: '🚗',
+      icon: driver,
       badge: null
     },
     {
       name: 'Analytics',
       path: '/analytics',
-      icon: '📈',
+      icon: analytics,
       badge: null
     }
   ];
@@ -55,8 +62,8 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4 bg-black text-white">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl">⚡</span>
-            <h1 className="text-xl font-bold">DeliveryAdmin</h1>
+            <span className="text-2xl"><img src={logo} alt="OTE logo" className="w-7 rounded-xl" /></span>
+            <h1 className="text-xl font-bold">OTE Admin</h1>
           </div>
           <button 
             onClick={onClose}
@@ -95,7 +102,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   }}
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-lg">{item.icon}</span>
+                    <span className="text-lg"><img src={item.icon} alt={item.name} className='w-8' /></span>
                     <span className="font-medium">{item.name}</span>
                   </div>
                   {item.badge && (
@@ -119,14 +126,14 @@ const Sidebar = ({ isOpen, onClose }) => {
                 onClick={onClose}
               >
                 <span>➕</span>
-                <span>Add Driver</span>
+                <span onClick={()=>navigate('/drivers')} className='text-sm font-semibold'>Add Driver</span>
               </button>
               <button 
                 className="w-full flex items-center space-x-3 px-4 py-3 text-left text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
                 onClick={onClose}
               >
                 <span>📊</span>
-                <span>Generate Report</span>
+                <span onClick={()=>navigate('/dashboard')} className='text-sm font-semibold'>Generate Report</span>
               </button>
             </div>
           </div>

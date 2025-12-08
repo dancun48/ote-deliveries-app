@@ -270,7 +270,6 @@ const Deliveries = () => {
         </div>
       ),
     },
-    // NEW: Add boxes column
     {
       key: "number_of_boxes",
       title: "Boxes",
@@ -282,7 +281,6 @@ const Deliveries = () => {
         </div>
       ),
     },
-    // NEW: Add zone column
     {
       key: "zone",
       title: "Zone",
@@ -298,7 +296,6 @@ const Deliveries = () => {
         </span>
       ),
     },
-    // NEW: Add price column
     {
       key: "total_price",
       title: "Total Price",
@@ -440,7 +437,7 @@ const Deliveries = () => {
           <h1 className="text-2xl font-bold text-gray-900">
             Deliveries Management
           </h1>
-          <p className="text-gray-600">Manage all delivery orders</p>
+          <p className="text-gray-500 text-sm">Manage all delivery orders</p>
         </div>
         <div className="flex space-x-3">
           <button
@@ -468,42 +465,42 @@ const Deliveries = () => {
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Total Deliveries</div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+          <div className="text-sm text-gray-600 mb-2">Total Deliveries</div>
           <div className="text-2xl font-bold text-gray-900">
             {pagination.total}
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Pending</div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+          <div className="text-sm text-gray-600 mb-2">Pending</div>
           <div className="text-2xl font-bold text-yellow-600">
             {deliveries.filter((d) => d.status === "pending").length}
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">In Transit</div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+          <div className="text-sm text-gray-600 mb-2">In Transit</div>
           <div className="text-2xl font-bold text-orange-600">
             {deliveries.filter((d) => d.status === "in_transit").length}
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Delivered</div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+          <div className="text-sm text-gray-600 mb-2">Delivered</div>
           <div className="text-2xl font-bold text-green-600">
             {deliveries.filter((d) => d.status === "delivered").length}
           </div>
         </div>
         {/* NEW: Revenue Stats */}
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Total Revenue</div>
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+          <div className="text-sm text-gray-600 mb-2">Total Revenue</div>
+          <div className="text-sm font-bold text-blue-600">
             KES{" "}
             {revenueStats?.totalRevenue
               ? revenueStats.totalRevenue.toFixed(2)
               : "0.00"}
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-sm text-gray-600">Avg. Boxes/Delivery</div>
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
+          <div className="text-sm text-gray-600 mb-2">Avg. Boxes/Delivery</div>
           <div className="text-2xl font-bold text-purple-600">
             {revenueStats?.averageBoxesPerDelivery
               ? revenueStats.averageBoxesPerDelivery.toFixed(1)

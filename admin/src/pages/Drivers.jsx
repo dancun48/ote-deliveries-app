@@ -146,11 +146,11 @@ const Drivers = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Drivers Management</h1>
-          <p className="text-gray-600">Manage delivery drivers and their vehicles</p>
+          <p className="text-gray-500 text-sm">Manage delivery drivers and their vehicles</p>
         </div>
         <button 
           onClick={() => setShowAddModal(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+          className="bg-gold text-black font-semibold text-sm px-4 py-2 rounded-lg hover:bg-gold/70 flex items-center space-x-2"
         >
           <span>➕</span>
           <span>Add Driver</span>
@@ -159,25 +159,25 @@ const Drivers = () => {
 
       {/* Drivers Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
           <div className="text-sm text-gray-600">Total Drivers</div>
           <div className="text-2xl font-bold text-gray-900">
             {drivers.length}
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
           <div className="text-sm text-gray-600">Active Drivers</div>
           <div className="text-2xl font-bold text-green-600">
             {drivers.filter(d => d.is_active).length}
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
           <div className="text-sm text-gray-600">Motorcycles</div>
           <div className="text-2xl font-bold text-blue-600">
             {drivers.filter(d => d.vehicle_type === 'Motorcycle').length}
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
           <div className="text-sm text-gray-600">Vans/Trucks</div>
           <div className="text-2xl font-bold text-orange-600">
             {drivers.filter(d => d.vehicle_type === 'Van').length}

@@ -34,18 +34,18 @@ const DataTable = ({
     <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-black">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-semibold text-gold uppercase tracking-tighter"
                 >
                   {column.title}
                 </th>
               ))}
               {actions.length > 0 && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">
                   Actions
                 </th>
               )}
@@ -83,7 +83,7 @@ const DataTable = ({
                               action.variant === 'danger' 
                                 ? 'bg-red-100 text-red-700 hover:bg-red-200' 
                                 : action.variant === 'primary'
-                                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                ? 'bg-gold/60 text-black hover:bg-gold/30'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                           >

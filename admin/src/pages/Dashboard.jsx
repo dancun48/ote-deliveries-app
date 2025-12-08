@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { adminService } from "../services/adminService";
 import StatsCard from "../components/StatsCard";
 import { useRealTime } from "../hooks/useRealTime";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { realTimeData } = useRealTime();
@@ -14,6 +15,7 @@ const Dashboard = () => {
     todayDeliveries: 0,
   });
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // FIX: Add safe access to realTimeData
   useEffect(() => {
@@ -79,8 +81,8 @@ const Dashboard = () => {
       {/* Page Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user?.firstName}</p>
+          <h1 className="text-2xl font-bold text-gray-900">OTE Admin</h1>
+          <p className="text-gray-600">Welcome back, {user?.lastName}</p>
         </div>
         <button
           onClick={fetchDashboardData}
@@ -133,7 +135,7 @@ const Dashboard = () => {
           <div className="space-y-3">
             <button className="w-full flex items-center space-x-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <span className="text-green-600 text-xl">➕</span>
-              <span>Add New Driver</span>
+              <span onClick={()=>navigate('/drivers')} >Add New Driver</span>
             </button>
             <button className="w-full flex items-center space-x-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <span className="text-blue-600 text-xl">📊</span>
@@ -141,7 +143,7 @@ const Dashboard = () => {
             </button>
             <button className="w-full flex items-center space-x-3 p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <span className="text-purple-600 text-xl">👥</span>
-              <span>Manage Users</span>
+              <span onClick={() => navigate('/users')}>Manage Users</span>
             </button>
           </div>
         </div>
