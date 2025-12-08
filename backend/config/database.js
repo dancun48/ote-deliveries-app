@@ -2,7 +2,7 @@ import pkg from "pg";
 
 const { Pool } = pkg;
 
-const getPoolConfig = process.env.DATABASE_URL
+const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
       ssl: {
@@ -17,7 +17,7 @@ const getPoolConfig = process.env.DATABASE_URL
       password: process.env.DB_PASSWORD || "",
     };
 
-const pool = new Pool(getPoolConfig());
+const pool = new Pool(poolConfig);
 
 export const testConnection = async () => {
   try {
