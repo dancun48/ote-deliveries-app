@@ -239,14 +239,12 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Start server with graceful database handling
 const startServer = async () => {
   // Start server immediately
   server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
     console.log(`🌐 Allowed Origins: ${allowedOrigins.join(", ")}`);
-    
     // Try database connection in background (non-blocking)
     setTimeout(async () => {
       try {
@@ -255,12 +253,11 @@ const startServer = async () => {
           console.log("✅ Database connected successfully");
         } else {
           console.log("⚠️  Running without database connection");
-          console.log("⚠️  Some database-dependent features may not work");
         }
       } catch (error) {
-        console.log("⚠️  Database connection failed silently:", error.message);
+        console.log("⚠️  Database connection error", error.message);
       }
-    }, 2000); // Delay to let server start first
+    }, 1000);
   });
 };
 
